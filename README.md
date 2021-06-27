@@ -93,8 +93,12 @@ CloudWatch 提供统计数据的依据是您的自定义数据所提供的指标
 ```
 
 
+## Practice
+创建cloudwatch event rule每分钟自动触发Lambda（Lambda功能需要自己实现，向cloudwatch metrics里push自定义的metrics），设置alarm检测task中定义的metric，自定义并监控条件使alarm触发阈值，alarm触发SNS，SNS发告警到邮箱。
+<div align="center"><img src="https://github.com/LunaTW/aws-cloudwatch-demo/blob/master/Ref/Practice1.png?raw=true" width=60%/></div>
 
 
+创建cloudwatch event rules，每分钟自动触发Lambda（输出固定格式的log message）。为lambda log创建metric filter，匹配log message，创建新的metric，自定义并监控条件使alarm触发阈值，alarm出发SNS，SNS发告警到邮箱。	
 
 
 
@@ -110,3 +114,6 @@ CloudWatch 提供统计数据的依据是您的自定义数据所提供的指标
 - [Amazon CloudWatch 常见问题](https://aws.amazon.com/cn/cloudwatch/faqs/)
 - [Amazon CloudWatch Concepts](https://docs.aws.amazon.com/zh_cn/AmazonCloudWatch/latest/monitoring/cloudwatch_concepts.html)
 - [什么是 Amazon CloudWatch Events？](https://docs.amazonaws.cn/AmazonCloudWatch/latest/events/WhatIsCloudWatchEvents.html)
+- [The most minimal AWS Lambda + Python + Terraform setup](https://www.davidbegin.com/the-most-minimal-aws-lambda-function-with-python-terraform/)
+- [aws_sns_topic_subscription](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sns_topic_subscription)
+- [boto3.amazonaws](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns.html#SNS.Client.publish)
