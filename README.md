@@ -117,3 +117,5 @@ CloudWatch 提供统计数据的依据是您的自定义数据所提供的指标
 - [The most minimal AWS Lambda + Python + Terraform setup](https://www.davidbegin.com/the-most-minimal-aws-lambda-function-with-python-terraform/)
 - [aws_sns_topic_subscription](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sns_topic_subscription)
 - [boto3.amazonaws](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns.html#SNS.Client.publish)
+- [使用 AWS Lambda 环境变量](https://docs.aws.amazon.com/zh_cn/lambda/latest/dg/configuration-envvars.html#configuration-envvars-config)
+
