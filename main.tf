@@ -147,12 +147,28 @@ resource "aws_sns_topic_subscription" "lottery_recommendation" {
   protocol  = "sqs"
 }
 
+resource "aws_iam_role" "luna_lottery_recommendation_role" {
+  name               = "luna_lottery_recommendation_role"
+  assume_role_policy = data.aws_iam_policy_document.luna_lottery_recommendation_role_policy.json
+}
+
+data "aws_iam_policy_document" "luna_lottery_recommendation_role_policy" {
+  statement {
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["lambda.amazonaws.com"]
+    }
+  }
+}
+
 resource "aws_lambda_function" "luna_auto_lottery_generator" {
   filename      = "luna_auto_lottery_generator.zip"
   function_name = "luna_auto_lottery_generator"
-  role          = var.luna_lambda_full_access_iam
-  handler       = "luna_auto_lottery_generator.lottery_generator"
-  runtime       = "python3.7"
+  role    = aws_iam_role.luna_lottery_recommendation_role.arn
+  handler = "luna_auto_lottery_generator.lottery_generator"
+  runtime = "python3.7"
   environment {
     variables = {
       targetARN = var.targetARN
@@ -193,4 +209,12 @@ resource "aws_cloudwatch_metric_alarm" "queue_oldest_message_age_over_1day" {
   dimensions = {
     QueueName = aws_sqs_queue.luna_lottery_recommendation_queue.name
   }
+}
+
+resource "aws_lambda_function" "luna_custom_metric_to_cloudwatch" {
+  filename      = "luna_custom_metric_to_cloudwatch.zip"
+  function_name = "luna_custom_metric_to_cloudwatch"
+  handler       = "luna_custom_metric_to_cloudwatch.custom_metric"
+  role    = aws_iam_role.luna_lottery_recommendation_role.arn
+  runtime = "python3.7"
 }
