@@ -60,6 +60,13 @@ Amazon SQS 队列
 
 相关概念理解：metrics，periods，namespace，count，dimensions，statistics。
 ```
+Metric -> cloudwatch中时间顺序排列的一组数据点，可以看作要监控的变量。
+指标由名称，名称空间和零个或多个维度唯一定义。
+Metrics are uniquely defined by a name, a namespace, and zero or more dimensions.
+```
+
+
+```
 - metrices
 指标是 CloudWatch 中的基本概念。指标代表一个发布到 CloudWatch 的时间排序的数据点集。可将指标视为要监控的变量，而数据点代表该变量随时间变化的值。例如，特定 EC2 实例的 CPU 使用率是 Amazon EC2 提供的一个指标。数据点本身可来自于您从中收集数据的任何应用程序或业务活动。
 默认情况下，许多AWS服务提供资源（例如 Amazon EC2 实例、Amazon EBS 卷和 Amazon RDS 数据库实例）的免费指标。收费后，您还可以启用对某些资源 (例如 Amazon EC2 实例) 的详细监控，或发布您自己的应用程序指标。对于自定义指标，您可以按照您选择的任何顺序和任何速率添加数据点。您可以按一组有序的时间序列数据来检索关于这些数据点的统计数据。
@@ -91,7 +98,20 @@ AWS向 CloudWatch 发送数据的服务将向每个指标附加维度。您可�
 CloudWatch 提供统计数据的依据是您的自定义数据所提供的指标数据点，或其他AWS服务添加到 CloudWatch。
 聚合通过使用命名空间、指标名称、维度以及数据点度量单位在您指定的时间段内完成。下表介绍了可用的统计信息。
 ```
+Quick Summary:
+```
+Namespaces
+- Metrics 的容器 (Container), 就是用來分類 AWS 服務的, 用 slash / 區隔. 像是 AWS/EC2, AWS/DynamoDB.
 
+Metrics
+- Metrics 意思是 度量, 是一個時間軸 (time-base) 的資料集合. 像是 ELB 的 HealthyHostCount, RequestCount, SurgeQueueLength 都叫做 Metrics.
+
+Dimensions
+- 量測的資源對象 (ARN)，是 Key/Value 呈現，像是 Name=InstanceId,Value=${INSTANCE_ID}, Name=LoadBalancerName,Value=${ARN_ID}
+
+Statistics
+- 時間範圍之內的統計方式，包含了：Sum, Minimum, Maximum, and SampleCount.
+```
 
 ## Practice
 创建cloudwatch event rule每分钟自动触发Lambda（Lambda功能需要自己实现，向cloudwatch metrics里push自定义的metrics），设置alarm检测task中定义的metric，自定义并监控条件使alarm触发阈值，alarm触发SNS，SNS发告警到邮箱。
@@ -106,7 +126,12 @@ CloudWatch 提供统计数据的依据是您的自定义数据所提供的指标
 
 
 
+### Tips
 
+Diff between aws_iam_role, aws_iam_policy, aws_iam_role_policy, aws_iam_policy_attachment, aws_iam_role_policy_attachment, aws_iam_policy_attachment、aws_iam_role_policy_attachment 和 aws_iam_role_policy:
+- `aws_iam_role`: Provides an IAM role.
+- `aws_iam_policy`: 
+- [aws_cloudwatch_log_resource_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_resource_policy)
 
 
 
@@ -118,4 +143,5 @@ CloudWatch 提供统计数据的依据是您的自定义数据所提供的指标
 - [aws_sns_topic_subscription](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sns_topic_subscription)
 - [boto3.amazonaws](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns.html#SNS.Client.publish)
 - [使用 AWS Lambda 环境变量](https://docs.aws.amazon.com/zh_cn/lambda/latest/dg/configuration-envvars.html#configuration-envvars-config)
-
+- [CloudWatch Metrics 的相關概念](https://rickhw.github.io/2017/03/02/AWS/Study-Notes-CloudWatch-Metrics/)
+- [为什么我的 CloudWatch 警报会在没有任何数据点超出阈值时触发？](https://aws.amazon.com/cn/premiumsupport/knowledge-center/cloudwatch-trigger-metric/)

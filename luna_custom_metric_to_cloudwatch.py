@@ -24,6 +24,22 @@ def custom_metric(event, lambda_context):
         ],
         Namespace='Luna'
     )
+    cloudwatch.put_metric_data(
+        MetricData = [
+            {
+                'MetricName': 'luna_ApproximateNumberOfMessagesVisible',
+                'Dimensions': [
+                    {
+                        'Name': 'QueueName',
+                        'Value': 'luna_lottery_recommendation_SQS'
+                    }
+                ],
+                'Unit': 'None',
+                'Value': 1
+            }
+        ],
+        Namespace='Luna'
+    )
 
     return "~ Adding custom metric to cloudwatch successful ~ "
 
