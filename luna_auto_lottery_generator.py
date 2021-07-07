@@ -15,4 +15,6 @@ def lottery_generator(event, lambda_context):
         MessageStructure='json'
     )
 
+    print(lottery_suggest)
+
     return lottery_suggest

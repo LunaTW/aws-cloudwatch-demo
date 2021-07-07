@@ -47,24 +47,12 @@ module "auto_lottery_generator_lambda" {
   }
 }
 
-resource "aws_cloudwatch_log_metric_filter" "luna_aws_cloudwatch_log_metric_filter" {
-  name           = "luna_aws_cloudwatch_log_metric_filter"
-  pattern        = "10"
-  log_group_name = module.auto_lottery_generator_lambda.log_group_name
-
-  metric_transformation {
-    name      = "luna_fraud_check_metric"
-    namespace = "Luna"
-    value     = "1"
-  }
-}
-
 module "luna_cloudEvent_trigger_lottery_recommendation_SNS" {
   source                                = "./templates/cloudevent"
   aws_cloudwatch_event_rule_description = "Luna's Lottery Recommendation, this event will trigger lottery_recommendation_SNS per 5min"
   aws_cloudwatch_event_rule_name        = "luna_cloudEvent_trigger_lottery_recommendation_SNS"
   cloudevent_trigger_target_arn         = module.luna_lottery_recommendation_topic.aws_sns_topic_arn
-  target_id                             = "SendToLambda"
+  target_id                             = "SendToSNS"
   event_rule_schedule                   = var.event_rule_schedule
 }
 
@@ -73,7 +61,7 @@ module "luna_cloudEvent_trigger_custom_lambda" {
   aws_cloudwatch_event_rule_description = "push custom metrics"
   aws_cloudwatch_event_rule_name        = "luna_cloudEvent_trigger_custom_lambda"
   cloudevent_trigger_target_arn         = module.luna_custom_metric_to_cloudwatch_lambda.aws_lambda_function_arn
-  target_id                             = "SendToSNS"
+  target_id                             = "SendToLambda"
   event_rule_schedule                   = var.event_rule_schedule
 }
 
@@ -99,9 +87,9 @@ module "luna_custom_metric_to_cloudwatch_lambda" {
   lambda_function_role    = module.luna_lottery_recommendation_role.iam_role_arn
   lambda_handler          = "luna_custom_metric_to_cloudwatch.custom_metric"
   lambda_runtime          = "python3.7"
-//  lambda_env_variables = {
-//    nothing = "nothing"
-//  }
+  lambda_env_variables = {
+    nothing = "nothing"
+  }
 }
 
 module "luna_lottery_sqs_message_Visible_custom_alarm" {
@@ -134,12 +122,24 @@ module "luna_lottery_fraud_check_alarm" {
   alarm_actions = [module.luna_monitoring_topic.aws_sns_topic_arn]
 }
 
-# https://github.com/pulumi/pulumi/issues/1660   Not support ？？？
+resource "aws_cloudwatch_log_metric_filter" "luna_aws_cloudwatch_log_metric_filter" {
+  name           = "luna_aws_cloudwatch_log_metric_filter"
+  pattern        = "10"
+  log_group_name = module.auto_lottery_generator_lambda.log_group_name
+
+  metric_transformation {
+    name      = "luna_fraud_check_metric"
+    namespace = "Luna"
+    //    dimensions = "fraud_choice"
+    value     = "1"
+  }
+}
+
+# https://github.com/pulumi/pulumi/issues/1660   Not support
 // https://github.com/hashicorp/terraform-provider-aws/blob/master/aws/resource_aws_sns_topic_subscription.go#L43-L55
 //resource "aws_sns_topic_subscription" "luna_sns_send_message_to_email" {
 //  endpoint = "yue.zhang1@thoughtworks.com"
 //  protocol = "email"
 //  topic_arn = module.luna_monitoring_topic.aws_sns_topic_arn
 //}
-
 

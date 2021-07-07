@@ -16,10 +16,8 @@ data "aws_iam_policy_document" "luna_lottery_custom_policy_document" {
     actions   = ["lambda:*"]
     resources = ["*"]
   }
+//  statement {
+//    actions = ["logs:*"]
+//    resources = ["*"]
+//  }
 }
-
-//output "luna_lottery_recommendation_role" {
-//  description = "ARN of luna_lottery_recommendation_role"
-//  value = module.luna_lottery_recommendation_role.iam_role_arn
-//}
-
