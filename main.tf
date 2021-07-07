@@ -35,13 +35,13 @@ module "luna_lottery_recommendation_queue" {
 }
 
 module "auto_lottery_generator_lambda" {
-  source                  = "./templates/lambda"
-  lambda_function_name    = "luna_auto_lottery_generator_lambda"
+  source = "./templates/lambda_with_log"
+  lambda_function_name = "luna_auto_lottery_generator_lambda"
   lambda_execute_filename = "luna_auto_lottery_generator.zip"
-  lambda_function_role    = module.luna_lottery_recommendation_role.iam_role_arn
-  lambda_handler          = "luna_auto_lottery_generator.lottery_generator"
-  lambda_runtime          = "python3.7"
-  //  lambda_env_variables = [{targetARN = var.targetARN}]
+  lambda_function_role = module.luna_lottery_recommendation_role.iam_role_arn
+  lambda_handler = "luna_auto_lottery_generator.lottery_generator"
+  lambda_iam_role_name = module.luna_lottery_recommendation_role.iam_role_name
+  lambda_runtime = "python3.7"
   lambda_env_variables = {
     targetARN = var.targetARN
   }
@@ -97,3 +97,21 @@ module "luna_lottery_sqs_message_Visible_custom_alarm" {
     QueueName = module.luna_lottery_recommendation_queue.sqs_queue_name
   }
 }
+
+# https://github.com/pulumi/pulumi/issues/1660   Not support ？？？
+//https://registry.terraform.io/modules/QuiNovas/sns-email-subscription/aws/latest?tab=inputs
+//module "sns-email-subscription" {
+//  source  = "QuiNovas/sns-email-subscription/aws"
+//  version = "0.0.3"
+//  # insert the 2 required variables here
+//  email_address = var.admin_email
+//  topic_arn = module.luna_monitoring_topic.aws_sns_topic_arn
+//}
+
+//resource "aws_sns_topic_subscription" "luna_sns_send_message_to_email" {
+//  endpoint = var.admin_email
+//  protocol = "email"
+//  topic_arn = module.luna_monitoring_topic.aws_sns_topic_arn
+//}
+
+

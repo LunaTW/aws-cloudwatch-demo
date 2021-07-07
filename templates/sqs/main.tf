@@ -1,6 +1,7 @@
 resource "aws_sqs_queue" "sqs" {
-  name = var.sqs_name
-  tags = var.tags
+  name                      = var.sqs_name
+  tags                      = var.tags
+  message_retention_seconds = var.message_retention_seconds
 }
 
 resource "aws_sqs_queue_policy" "queue_policy" {
