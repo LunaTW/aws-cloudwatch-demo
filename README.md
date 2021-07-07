@@ -114,13 +114,51 @@ Statistics
 ```
 
 ## Practice
-创建cloudwatch event rule每分钟自动触发Lambda（Lambda功能需要自己实现，向cloudwatch metrics里push自定义的metrics），设置alarm检测task中定义的metric，自定义并监控条件使alarm触发阈值，alarm触发SNS，SNS发告警到邮箱。
-<div align="center"><img src="https://github.com/LunaTW/aws-cloudwatch-demo/blob/master/Ref/Practice1.png?raw=true" width=60%/></div>
+- 创建cloudwatch event rule每分钟自动触发Lambda（Lambda功能需要自己实现，向cloudwatch metrics里push自定义的metrics），设置alarm检测task中定义的metric，自定义并监控条件使alarm触发阈值，alarm触发SNS，SNS发告警到邮箱。
+- 创建cloudwatch event rules，每分钟自动触发Lambda（输出固定格式的log message）。为lambda log创建metric filter，匹配log message，创建新的metric，自定义并监控条件使alarm触发阈值，alarm出发SNS，SNS发告警到邮箱。	
+
+Task：
+七星彩彩票推荐系统
+1. 七星彩规则 [0-10]*6 + [0-14]*1
+2. cloudwatch event 每五分钟 触发一次 彩票自动生成器（auto_lottery_generator_lambda）， 其生成的结果将发布至 彩票推荐SNS（luna_lottery_recommendation_topic），下游的订阅者（luna_lottery_recommendation_queue）将会得到此推荐号码。
+3. 如果下游的订阅者的队列中有超过10条消息没有消耗，将会生成报警，以提醒订阅者及时查看消息
+4. 经小道消息，下次彩票绝对不会出现数字10，决定添加一个监控，即如果SNS的log中出现数字10，则会生成警报。此功能通过自制的metric实现
+5. 所有的警报都会通过luna_monitoring_topic 发送到 监控系统中（admin email）
+
+<div align="center"><img src="https://github.com/LunaTW/aws-cloudwatch-demo/blob/master/Ref/All%20flow.png?raw=true" width=90%/></div>
 
 
-创建cloudwatch event rules，每分钟自动触发Lambda（输出固定格式的log message）。为lambda log创建metric filter，匹配log message，创建新的metric，自定义并监控条件使alarm触发阈值，alarm出发SNS，SNS发告警到邮箱。	
+拆分：
+- 2 个 SNS：
+``` 
+- luna_monitoring_topic: 所有的警报都会发送到这个SNS中
+- luna_lottery_recommendation_topic： 推荐的彩票号码会推送至此SNS中
+```
+- 1 个 SQS：
+```
+- luna_lottery_recommendation_queue: 此SQS会订阅彩票推荐系统的SNS 即 luna_lottery_recommendation_topic
+```
+- 2 个 cloudevent
+```
+- luna_cloudEvent_trigger_lottery_recommendation_SNS 事件：每5分钟触发一次 auto_lottery_generator_lambda。
+- luna_cloudEvent_trigger_custom_lambda 事件：每5分钟触发一次 luna_custom_metric_to_cloudwatch_lambda。
+```
 
-
+- 2 个 lambda：
+```
+- auto_lottery_generator_lambda 彩票推荐号码生成器，会自动生成符合规则的彩票号码，并推送给下游，即 luna_lottery_recommendation_topic。并生成 log 至 log group。
+- luna_custom_metric_to_cloudwatch_lambda 定制metric。
+```
+3 个 alarm
+```
+- luna_lottery_sqs_message_Visible_alarm: 通过AWS的metric检测：SQS（luna_lottery_recommendation_queue）中有超过 10条消息没有消耗。
+- luna_lottery_sqs_message_Visible_custom_alarm： 通过自制metric检测：SQS（luna_lottery_recommendation_queue）中有超过 10条消息没有消耗
+- luna_lottery_fraud_check_alarm： 通过自制metric检测：SNS（luna_lottery_recommendation_topic）推荐的彩票中含有 数字 10 
+```
+- 1. metrics filter
+```
+- aws_cloudwatch_log_metric_filter 会过滤 SNS（luna_lottery_recommendation_topic） 中的推荐号码，将 过滤符合需求的 log 至指定的 metric
+```
 
 
 

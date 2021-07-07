@@ -35,3 +35,8 @@ variable "custom_metric_name" {
   description = "This is a custom metric from sqs"
   default     = "luna_test_metric"
 }
+
+variable "fraud_check_metric_name" {
+  description = "This is a custom metric from sqs"
+  default     = "luna_fraud_check_metric"
+}

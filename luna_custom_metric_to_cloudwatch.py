@@ -40,6 +40,22 @@ def custom_metric(event, lambda_context):
         ],
         Namespace='Luna'
     )
+    cloudwatch.put_metric_data(
+        MetricData = [
+            {
+                'MetricName': 'luna_fraud_check_metric',
+                'Dimensions': [
+                    {
+                        'Name': 'fraud_choice',
+                        'Value': 'value_is_ten'
+                    }
+                ],
+                'Unit': 'None',
+                'Value': 1
+            },
+        ],
+        Namespace='Luna'
+    )
 
     return "~ Adding custom metric to cloudwatch successful ~ "
 

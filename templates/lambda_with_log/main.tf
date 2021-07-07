@@ -46,3 +46,7 @@ resource "aws_iam_policy" "lambda_logging" {
 }
 EOF
 }
+
+output "log_group_name" {
+  value = aws_cloudwatch_log_group.example.name
+}
