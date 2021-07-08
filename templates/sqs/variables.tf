@@ -8,7 +8,16 @@ variable "tags" {
   type        = map(string)
 }
 
-variable "message_retention_seconds" {
+variable "sqs_message_retention_seconds" {
+  description = "The number of seconds Amazon SQS retains a message."
+  default     = 604800
+}
+
+variable "dead_letter_maxReceive_Count" {
+  default = 5
+}
+
+variable "dead_letter_queue_message_retention_seconds" {
   description = "The number of seconds Amazon SQS retains a message."
   default     = 604800
 }

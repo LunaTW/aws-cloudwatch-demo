@@ -1,7 +1,17 @@
 resource "aws_sqs_queue" "sqs" {
   name                      = var.sqs_name
   tags                      = var.tags
-  message_retention_seconds = var.message_retention_seconds
+  message_retention_seconds = var.sqs_message_retention_seconds
+  redrive_policy = jsonencode({
+    deadLetterTargetArn = aws_sqs_queue.dead-letter-queue.arn
+    maxReceiveCount     = var.dead_letter_maxReceive_Count
+  })
+}
+
+resource "aws_sqs_queue" "dead-letter-queue" {
+  name = "${var.sqs_name}-dead-letter-queue"
+  message_retention_seconds = var.dead_letter_queue_message_retention_seconds
+  tags = var.tags
 }
 
 resource "aws_sqs_queue_policy" "queue_policy" {
@@ -41,4 +51,14 @@ output "sqs_queue_arn" {
 output "sqs_queue_name" {
   description = "Name of aws_sqs_queue"
   value       = aws_sqs_queue.sqs.name
+}
+
+output "dead_letter_queue_arn" {
+  description = "ARN of dlq topic"
+  value       = aws_sqs_queue.dead-letter-queue.arn
+}
+
+output "dead_letter_queue_name" {
+  description = "Name of dlq"
+  value       = aws_sqs_queue.dead-letter-queue.name
 }
