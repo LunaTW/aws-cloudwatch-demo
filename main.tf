@@ -141,18 +141,20 @@ resource "aws_cloudwatch_log_metric_filter" "luna_aws_cloudwatch_log_metric_filt
 // https://github.com/pulumi/pulumi/issues/1660   Not support
 // https://github.com/hashicorp/terraform-provider-aws/blob/master/aws/resource_aws_sns_topic_subscription.go#L43-L55
 // https://github.com/zghafari/tf-sns-email-list
-//resource "aws_sns_topic_subscription" "luna_sns_send_message_to_email" {
-//  endpoint = "yue.zhang1@thoughtworks.com"
-//  protocol = "email"
-//  topic_arn = module.luna_monitoring_topic.aws_sns_topic_arn
-//}
+module "luna_monitoring_SNS_send_email_to_admin" {
+  source = "./templates/sns_email_subscription"
+  display_name = "luna_monitoring_SNS_send_email_to_admin"
+  email_addresses = var.admin_email
+  stack_name = "lunaSNSSendEmailToAdminStack"
+  tags = var.tags
+  topicArn = module.luna_monitoring_topic.aws_sns_topic_arn
+}
 
-//module "luna_monitoring_SNS_send_email_to_admin" {
-//  source = "./templates/sns_email_subscription"
-//  display_name = "luna_monitoring_SNS_send_email_to_admin"
-//  email_addresses = var.admin_email
-//  stack_name = "luna_monitoring_SNS_send_email_to_admin_stack"
-//  tags = var.tags
-//}
-
-
+module "luna_lottery_generator_SNS_send_lottery_tracking_email" {
+  source = "./templates/sns_email_subscription"
+  display_name = "luna_lottery_generator_SNS_send_lottery_tracking_email"
+  email_addresses = var.lottery_tracking_email
+  stack_name = "lunaSNSSendEmailToLotteryTrackingEmail"
+  tags = var.tags
+  topicArn = module.luna_lottery_recommendation_topic.aws_sns_topic_arn
+}

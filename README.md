@@ -184,4 +184,4 @@ Diff between aws_iam_role, aws_iam_policy, aws_iam_role_policy, aws_iam_policy_a
 - [CloudWatch Metrics 的相關概念](https://rickhw.github.io/2017/03/02/AWS/Study-Notes-CloudWatch-Metrics/)
 - [为什么我的 CloudWatch 警报会在没有任何数据点超出阈值时触发？](https://aws.amazon.com/cn/premiumsupport/knowledge-center/cloudwatch-trigger-metric/)
 - [sns-email-subscription module](https://registry.terraform.io/modules/QuiNovas/sns-email-subscription/aws/latest?tab=inputs)
-
+- [Github: tf-sns-email-list](https://github.com/zghafari/tf-sns-email-list)
