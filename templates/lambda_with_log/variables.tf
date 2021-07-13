@@ -19,3 +19,5 @@ variable "lambda_env_variables" {
 }
 
 variable "lambda_iam_role_name" {}
+
+variable "lambda_upstream_source_arn" {}

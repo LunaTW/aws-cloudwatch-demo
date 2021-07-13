@@ -13,3 +13,7 @@ resource "aws_cloudwatch_event_target" "default" {
   rule      = aws_cloudwatch_event_rule.default.name
   target_id = var.target_id
 }
+
+output "cloudwatch_event_rule_arn" {
+  value = aws_cloudwatch_event_rule.default.arn
+}

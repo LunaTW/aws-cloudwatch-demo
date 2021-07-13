@@ -17,8 +17,20 @@ resource "aws_cloudwatch_log_group" "example" {
   retention_in_days = 14
 }
 
+resource "aws_lambda_permission" "allow_cloudwatch" {
+  statement_id  = "AllowExecutionFromCloudWatch"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.lambda.function_name
+  principal     = "events.amazonaws.com"
+  source_arn    = var.lambda_upstream_source_arn
+}
+
 output "log_group_name" {
   value = aws_cloudwatch_log_group.example.name
+}
+
+output "log_group_arn" {
+  value = aws_cloudwatch_log_group.example.arn
 }
 
 output "aws_lambda_function_arn" {

@@ -45,13 +45,14 @@ module "auto_lottery_generator_lambda" {
   lambda_env_variables = {
     targetARN = module.luna_lottery_recommendation_topic.aws_sns_topic_arn
   }
+  lambda_upstream_source_arn = "${module.luna_cloudEvent_trigger_lottery_recommendation_lambda.cloudwatch_event_rule_arn}"
 }
 
-module "luna_cloudEvent_trigger_lottery_recommendation_SNS" {
+module "luna_cloudEvent_trigger_lottery_recommendation_lambda" {
   source                                = "./templates/cloudevent"
   aws_cloudwatch_event_rule_description = "Luna's Lottery Recommendation, this event will trigger lottery_recommendation_SNS per 5min"
-  aws_cloudwatch_event_rule_name        = "luna_cloudEvent_trigger_lottery_recommendation_SNS"
-  cloudevent_trigger_target_arn         = module.luna_lottery_recommendation_topic.aws_sns_topic_arn
+  aws_cloudwatch_event_rule_name        = "luna_cloudEvent_trigger_lottery_recommendation_lambda"
+  cloudevent_trigger_target_arn         = module.auto_lottery_generator_lambda.aws_lambda_function_arn
   target_id                             = "SendToSNS"
   event_rule_schedule                   = var.event_rule_schedule
 }
@@ -81,7 +82,6 @@ module "luna_lottery_sqs_message_Visible_alarm" {
 }
 
 module "luna_custom_metric_to_cloudwatch_lambda" {
-//  source = "./templates/lambda"
   source                  = "./templates/lambda_with_log"
   lambda_function_name    = "luna_custom_metric_to_cloudwatch_alarm"
   lambda_execute_filename = "luna_custom_metric_to_cloudwatch.zip"
@@ -92,6 +92,7 @@ module "luna_custom_metric_to_cloudwatch_lambda" {
   lambda_env_variables = {
     nothing = "nothing"
   }
+  lambda_upstream_source_arn = "${module.luna_cloudEvent_trigger_custom_lambda.cloudwatch_event_rule_arn}"
 }
 
 module "luna_lottery_sqs_message_Visible_custom_alarm" {
