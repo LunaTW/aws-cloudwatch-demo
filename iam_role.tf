@@ -16,8 +16,10 @@ data "aws_iam_policy_document" "luna_lottery_custom_policy_document" {
     actions   = ["lambda:*"]
     resources = ["*"]
   }
-//  statement {
-//    actions = ["logs:*"]
-//    resources = ["*"]
-//  }
+  statement {
+    actions = ["logs:CreateLogGroup",
+      "logs:CreateLogStream",
+    "logs:PutLogEvents"]
+    resources = ["arn:aws:logs:*:*:*"]
+  }
 }

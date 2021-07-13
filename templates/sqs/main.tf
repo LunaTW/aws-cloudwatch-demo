@@ -9,9 +9,9 @@ resource "aws_sqs_queue" "sqs" {
 }
 
 resource "aws_sqs_queue" "dead-letter-queue" {
-  name = "${var.sqs_name}-dead-letter-queue"
+  name                      = "${var.sqs_name}-dead-letter-queue"
   message_retention_seconds = var.dead_letter_queue_message_retention_seconds
-  tags = var.tags
+  tags                      = var.tags
 }
 
 resource "aws_sqs_queue_policy" "queue_policy" {
