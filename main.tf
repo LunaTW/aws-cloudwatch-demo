@@ -34,18 +34,40 @@ module "luna_lottery_recommendation_queue" {
   tags                       = var.tags
 }
 
+module "luna_lottery_SNS_tracking_lambda" {
+  source                  = "./templates/lambda_with_log"
+  lambda_function_name    = "luna_lottery_SNS_tracking_lambda"
+  lambda_execute_filename = "luna_lottery_SNS_tracking.zip"
+  lambda_function_role    = module.luna_lottery_recommendation_role.iam_role_arn
+  lambda_handler          = "luna_lottery_SNS_tracking.sns_tracking_log"
+  principal               = "sns.amazonaws.com"
+  lambda_iam_role_name    = module.luna_lottery_recommendation_role.iam_role_name
+  lambda_runtime          = "python3.7"
+  lambda_env_variables = {
+    nothing = "nothing"
+  }
+//  lambda_upstream_source_arn = module.luna_lottery_recommendation_topic.aws_sns_topic_arn
+}
+
+resource "aws_sns_topic_subscription" "lottery_SNS_trigger_tracking_lambda" {
+  topic_arn = module.luna_monitoring_topic.aws_sns_topic_arn
+  protocol  = "lambda"
+  endpoint  = module.luna_lottery_SNS_tracking_lambda.aws_lambda_function_arn
+}
+
 module "auto_lottery_generator_lambda" {
   source                  = "./templates/lambda_with_log"
   lambda_function_name    = "luna_auto_lottery_generator_lambda"
   lambda_execute_filename = "luna_auto_lottery_generator.zip"
   lambda_function_role    = module.luna_lottery_recommendation_role.iam_role_arn
   lambda_handler          = "luna_auto_lottery_generator.lottery_generator"
+  principal               = "events.amazonaws.com"
   lambda_iam_role_name    = module.luna_lottery_recommendation_role.iam_role_name
   lambda_runtime          = "python3.7"
   lambda_env_variables = {
     targetARN = module.luna_lottery_recommendation_topic.aws_sns_topic_arn
   }
-  lambda_upstream_source_arn = "${module.luna_cloudEvent_trigger_lottery_recommendation_lambda.cloudwatch_event_rule_arn}"
+  lambda_upstream_source_arn = module.luna_cloudEvent_trigger_lottery_recommendation_lambda.cloudwatch_event_rule_arn
 }
 
 module "luna_cloudEvent_trigger_lottery_recommendation_lambda" {
@@ -88,11 +110,12 @@ module "luna_custom_metric_to_cloudwatch_lambda" {
   lambda_function_role    = module.luna_lottery_recommendation_role.iam_role_arn
   lambda_handler          = "luna_custom_metric_to_cloudwatch.custom_metric"
   lambda_iam_role_name    = module.luna_lottery_recommendation_role.iam_role_name
-  lambda_runtime = "python3.7"
+  principal               = "events.amazonaws.com"
+  lambda_runtime          = "python3.7"
   lambda_env_variables = {
     nothing = "nothing"
   }
-  lambda_upstream_source_arn = "${module.luna_cloudEvent_trigger_custom_lambda.cloudwatch_event_rule_arn}"
+  lambda_upstream_source_arn = module.luna_cloudEvent_trigger_custom_lambda.cloudwatch_event_rule_arn
 }
 
 module "luna_lottery_sqs_message_Visible_custom_alarm" {
@@ -142,19 +165,19 @@ resource "aws_cloudwatch_log_metric_filter" "luna_aws_cloudwatch_log_metric_filt
 // https://github.com/hashicorp/terraform-provider-aws/blob/master/aws/resource_aws_sns_topic_subscription.go#L43-L55
 // https://github.com/zghafari/tf-sns-email-list
 module "luna_monitoring_SNS_send_email_to_admin" {
-  source = "./templates/sns_email_subscription"
-  display_name = "luna_monitoring_SNS_send_email_to_admin"
+  source          = "./templates/sns_email_subscription"
+  display_name    = "luna_monitoring_SNS_send_email_to_admin"
   email_addresses = var.admin_email
-  stack_name = "lunaSNSSendEmailToAdminStack"
-  tags = var.tags
-  topicArn = module.luna_monitoring_topic.aws_sns_topic_arn
+  stack_name      = "lunaSNSSendEmailToAdminStack"
+  tags            = var.tags
+  topicArn        = module.luna_monitoring_topic.aws_sns_topic_arn
 }
 
 module "luna_lottery_generator_SNS_send_lottery_tracking_email" {
-  source = "./templates/sns_email_subscription"
-  display_name = "luna_lottery_generator_SNS_send_lottery_tracking_email"
+  source          = "./templates/sns_email_subscription"
+  display_name    = "luna_lottery_generator_SNS_send_lottery_tracking_email"
   email_addresses = var.lottery_tracking_email
-  stack_name = "lunaSNSSendEmailToLotteryTrackingEmail"
-  tags = var.tags
-  topicArn = module.luna_lottery_recommendation_topic.aws_sns_topic_arn
+  stack_name      = "lunaSNSSendEmailToLotteryTrackingEmail"
+  tags            = var.tags
+  topicArn        = module.luna_lottery_recommendation_topic.aws_sns_topic_arn
 }

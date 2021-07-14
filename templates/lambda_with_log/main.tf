@@ -4,7 +4,7 @@ resource "aws_lambda_function" "lambda" {
   role          = var.lambda_function_role
   handler       = var.lambda_handler
   runtime       = var.lambda_runtime
-  depends_on = [  aws_cloudwatch_log_group.example ]
+  depends_on    = [aws_cloudwatch_log_group.example]
   environment {
     variables = var.lambda_env_variables
   }
@@ -21,7 +21,7 @@ resource "aws_lambda_permission" "allow_cloudwatch" {
   statement_id  = "AllowExecutionFromCloudWatch"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.lambda.function_name
-  principal     = "events.amazonaws.com"
+  principal     = var.principal
   source_arn    = var.lambda_upstream_source_arn
 }
 
