@@ -13,6 +13,11 @@ variable "sqs_message_retention_seconds" {
   default     = 604800
 }
 
+variable "visibility_timeout_seconds" {
+  description = "The visibility timeout for the queue."
+  default = 300
+}
+
 variable "dead_letter_maxReceive_Count" {
   default = 5
 }

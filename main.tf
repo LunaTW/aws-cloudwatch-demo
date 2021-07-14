@@ -46,13 +46,32 @@ module "luna_lottery_SNS_tracking_lambda" {
   lambda_env_variables = {
     nothing = "nothing"
   }
-//  lambda_upstream_source_arn = module.luna_lottery_recommendation_topic.aws_sns_topic_arn
+  //  lambda_upstream_source_arn = module.luna_lottery_recommendation_topic.aws_sns_topic_arn ???
 }
 
 resource "aws_sns_topic_subscription" "lottery_SNS_trigger_tracking_lambda" {
-  topic_arn = module.luna_monitoring_topic.aws_sns_topic_arn
+  topic_arn = module.luna_lottery_recommendation_topic.aws_sns_topic_arn
   protocol  = "lambda"
   endpoint  = module.luna_lottery_SNS_tracking_lambda.aws_lambda_function_arn
+}
+
+module "luna_lottery_SQS_tracking_lambda" {
+  source                  = "./templates/lambda_with_log"
+  lambda_function_name    = "luna_lottery_SQS_tracking_lambda"
+  lambda_execute_filename = "luna_lottery_SQS_tracking.zip"
+  lambda_function_role    = module.luna_lottery_recommendation_role.iam_role_arn
+  lambda_handler          = "luna_lottery_SQS_tracking.sqs_tracking_log"
+  principal               = "sqs.amazonaws.com"
+  lambda_iam_role_name    = module.luna_lottery_recommendation_role.iam_role_name
+  lambda_runtime          = "python3.7"
+  lambda_env_variables = {
+    nothing = "nothing"
+  }
+}
+
+resource "aws_lambda_event_source_mapping" "lottery_SQS_trigger_tracking_lambda" {
+  event_source_arn = module.luna_lottery_recommendation_queue.sqs_queue_arn
+  function_name = module.luna_lottery_SQS_tracking_lambda.aws_lambda_function_arn
 }
 
 module "auto_lottery_generator_lambda" {
