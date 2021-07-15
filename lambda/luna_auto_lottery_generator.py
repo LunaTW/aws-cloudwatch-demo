@@ -16,5 +16,6 @@ def lottery_generator(event, lambda_context):
     )
 
     print(lottery_suggest)
+    print("test")
 
     return lottery_suggest

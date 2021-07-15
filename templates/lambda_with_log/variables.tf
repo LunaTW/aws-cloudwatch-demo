@@ -12,6 +12,8 @@ variable "lambda_handler" {}
 
 variable "lambda_runtime" {}
 
+variable "source_code_hash" {}
+
 variable "lambda_env_variables" {
   description = "this is the env variable prepared for lambda"
   //  type    = map(string)

@@ -1,10 +1,11 @@
 resource "aws_lambda_function" "lambda" {
-  filename      = var.lambda_execute_filename
-  function_name = var.lambda_function_name
-  role          = var.lambda_function_role
-  handler       = var.lambda_handler
-  runtime       = var.lambda_runtime
-  depends_on    = [aws_cloudwatch_log_group.example]
+  filename         = var.lambda_execute_filename
+  function_name    = var.lambda_function_name
+  role             = var.lambda_function_role
+  handler          = var.lambda_handler
+  runtime          = var.lambda_runtime
+  source_code_hash = var.source_code_hash
+  depends_on       = [aws_cloudwatch_log_group.example]
   environment {
     variables = var.lambda_env_variables
   }

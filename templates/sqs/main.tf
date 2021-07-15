@@ -1,7 +1,7 @@
 resource "aws_sqs_queue" "sqs" {
-  name                      = var.sqs_name
-  tags                      = var.tags
-  message_retention_seconds = var.sqs_message_retention_seconds
+  name                       = var.sqs_name
+  tags                       = var.tags
+  message_retention_seconds  = var.sqs_message_retention_seconds
   visibility_timeout_seconds = var.visibility_timeout_seconds
   redrive_policy = jsonencode({
     deadLetterTargetArn = aws_sqs_queue.dead-letter-queue.arn
