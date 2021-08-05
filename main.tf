@@ -1,3 +1,4 @@
+// ****************************** SNS ****************************** //
 module "luna_monitoring_topic" {
   source       = "./templates/sns"
   display_name = "luna'S monitoring SNS"
@@ -12,12 +13,32 @@ module "luna_lottery_recommendation_topic" {
   tags         = var.tags
 }
 
+// ****************************** SQS ****************************** //
 module "luna_lottery_recommendation_queue" {
   source   = "./templates/sqs-with-subscription"
   sqs_name = "luna_lottery_recommendation_SQS"
   subscribed_sns_topic_names = [
-  module.luna_lottery_recommendation_topic.aws_sns_topic_arn]
+    module.luna_lottery_recommendation_topic.aws_sns_topic_arn]
   tags = var.tags
+}
+
+// ****************************** lambda ****************************** //
+module "auto_lottery_generator_lambda" {
+  source                  = "./templates/lambda_with_log"
+  lambda_function_name    = "luna_auto_lottery_generator_lambda"
+  lambda_execute_filename = "./lambda/luna_auto_lottery_generator.zip"
+
+  //  filebase64sha256("${path.module}/my-package.zip")
+  lambda_function_role = module.luna_lottery_recommendation_role.iam_role_arn
+  lambda_handler       = "luna_auto_lottery_generator.lottery_generator"
+  principal            = "events.amazonaws.com"
+  lambda_iam_role_name = module.luna_lottery_recommendation_role.iam_role_name
+  lambda_runtime       = "python3.7"
+  source_code_hash     = filebase64sha256("./lambda/luna_auto_lottery_generator.zip")
+  lambda_env_variables = {
+    targetARN = module.luna_lottery_recommendation_topic.aws_sns_topic_arn
+  }
+  lambda_upstream_source_arn = module.luna_cloudEvent_trigger_lottery_recommendation_lambda.cloudwatch_event_rule_arn
 }
 
 module "luna_lottery_SNS_tracking_lambda" {
@@ -61,24 +82,23 @@ resource "aws_lambda_event_source_mapping" "lottery_SQS_trigger_tracking_lambda"
   function_name    = module.luna_lottery_SQS_tracking_lambda.aws_lambda_function_arn
 }
 
-module "auto_lottery_generator_lambda" {
+module "luna_custom_metric_to_cloudwatch_lambda" {
   source                  = "./templates/lambda_with_log"
-  lambda_function_name    = "luna_auto_lottery_generator_lambda"
-  lambda_execute_filename = "./lambda/luna_auto_lottery_generator.zip"
-
-  //  filebase64sha256("${path.module}/my-package.zip")
-  lambda_function_role = module.luna_lottery_recommendation_role.iam_role_arn
-  lambda_handler       = "luna_auto_lottery_generator.lottery_generator"
-  principal            = "events.amazonaws.com"
-  lambda_iam_role_name = module.luna_lottery_recommendation_role.iam_role_name
-  lambda_runtime       = "python3.7"
-  source_code_hash     = filebase64sha256("./lambda/luna_auto_lottery_generator.zip")
+  lambda_function_name    = "luna_custom_metric_to_cloudwatch_alarm"
+  lambda_execute_filename = "./lambda/luna_custom_metric_to_cloudwatch.zip"
+  lambda_function_role    = module.luna_lottery_recommendation_role.iam_role_arn
+  lambda_handler          = "luna_custom_metric_to_cloudwatch.custom_metric"
+  lambda_iam_role_name    = module.luna_lottery_recommendation_role.iam_role_name
+  principal               = "events.amazonaws.com"
+  lambda_runtime          = "python3.7"
+  source_code_hash        = filebase64sha256("./lambda/luna_custom_metric_to_cloudwatch.zip")
   lambda_env_variables = {
-    targetARN = module.luna_lottery_recommendation_topic.aws_sns_topic_arn
+    nothing = "nothing"
   }
-  lambda_upstream_source_arn = module.luna_cloudEvent_trigger_lottery_recommendation_lambda.cloudwatch_event_rule_arn
+  lambda_upstream_source_arn = module.luna_cloudEvent_trigger_custom_lambda.cloudwatch_event_rule_arn
 }
 
+// ****************************** cloudWatch event ****************************** //
 module "luna_cloudEvent_trigger_lottery_recommendation_lambda" {
   source                                = "./templates/cloudevent"
   aws_cloudwatch_event_rule_description = "Luna's Lottery Recommendation, this event will trigger lottery_recommendation_SNS per 5min"
@@ -97,6 +117,7 @@ module "luna_cloudEvent_trigger_custom_lambda" {
   event_rule_schedule                   = var.event_rule_schedule
 }
 
+// ****************************** CloudWatch ****************************** //
 module "luna_lottery_sqs_message_Visible_alarm" {
   source            = "./templates/cloudwatch_metric"
   alarm_name        = "luna_lottery_sqs_message_viable_message_alarm"
@@ -110,25 +131,9 @@ module "luna_lottery_sqs_message_Visible_alarm" {
   namespace = "AWS/SQS"
   statistic = "Maximum"
   ok_actions = [
-  module.luna_monitoring_topic.aws_sns_topic_arn]
+    module.luna_monitoring_topic.aws_sns_topic_arn]
   alarm_actions = [
-  module.luna_monitoring_topic.aws_sns_topic_arn]
-}
-
-module "luna_custom_metric_to_cloudwatch_lambda" {
-  source                  = "./templates/lambda_with_log"
-  lambda_function_name    = "luna_custom_metric_to_cloudwatch_alarm"
-  lambda_execute_filename = "./lambda/luna_custom_metric_to_cloudwatch.zip"
-  lambda_function_role    = module.luna_lottery_recommendation_role.iam_role_arn
-  lambda_handler          = "luna_custom_metric_to_cloudwatch.custom_metric"
-  lambda_iam_role_name    = module.luna_lottery_recommendation_role.iam_role_name
-  principal               = "events.amazonaws.com"
-  lambda_runtime          = "python3.7"
-  source_code_hash        = filebase64sha256("./lambda/luna_custom_metric_to_cloudwatch.zip")
-  lambda_env_variables = {
-    nothing = "nothing"
-  }
-  lambda_upstream_source_arn = module.luna_cloudEvent_trigger_custom_lambda.cloudwatch_event_rule_arn
+    module.luna_monitoring_topic.aws_sns_topic_arn]
 }
 
 module "luna_lottery_sqs_message_Visible_custom_alarm" {
@@ -141,9 +146,9 @@ module "luna_lottery_sqs_message_Visible_custom_alarm" {
   threshold         = 10
   // maximum viable message is 10
   ok_actions = [
-  module.luna_monitoring_topic.aws_sns_topic_arn]
+    module.luna_monitoring_topic.aws_sns_topic_arn]
   alarm_actions = [
-  module.luna_monitoring_topic.aws_sns_topic_arn]
+    module.luna_monitoring_topic.aws_sns_topic_arn]
   dimensions = {
     QueueName = module.luna_lottery_recommendation_queue.sqs_queue_name
   }
@@ -161,9 +166,9 @@ module "luna_lottery_fraud_check_alarm" {
   namespace   = "Luna"
   statistic   = "Maximum"
   ok_actions = [
-  module.luna_monitoring_topic.aws_sns_topic_arn]
+    module.luna_monitoring_topic.aws_sns_topic_arn]
   alarm_actions = [
-  module.luna_monitoring_topic.aws_sns_topic_arn]
+    module.luna_monitoring_topic.aws_sns_topic_arn]
 }
 
 resource "aws_cloudwatch_log_metric_filter" "luna_aws_cloudwatch_log_metric_filter" {
@@ -179,6 +184,7 @@ resource "aws_cloudwatch_log_metric_filter" "luna_aws_cloudwatch_log_metric_filt
   }
 }
 
+// ****************************** templates ****************************** //
 module "luna_monitoring_SNS_send_email_to_admin" {
   source          = "./templates/sns_email_subscription"
   display_name    = "luna_monitoring_SNS_send_email_to_admin"
