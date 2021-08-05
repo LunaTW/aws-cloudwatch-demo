@@ -186,5 +186,7 @@ Diff between aws_iam_role, aws_iam_policy, aws_iam_role_policy, aws_iam_policy_a
 - [sns-email-subscription module](https://registry.terraform.io/modules/QuiNovas/sns-email-subscription/aws/latest?tab=inputs)
 - [Github: tf-sns-email-list](https://github.com/zghafari/tf-sns-email-list)
 - [aws lambda之接收sns消息](https://blog.csdn.net/Jailman/article/details/102728219)
+- [使用node.js发布到Amazon sns主题的参数示例](https://www.coder.work/article/7232808)
+- [Calling the setSMSAttributes operation](http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/SNS.html#publish-property)
 
-
+- [](https://stackoverflow.com/questions/34029251/aws-publish-sns-message-for-lambda-function-via-boto3-python2)
