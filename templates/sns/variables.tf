@@ -12,3 +12,5 @@ variable "tags" {
   description = "A mapping of tags"
   type        = map(string)
 }
+
+variable "kms_master_key_id" {}

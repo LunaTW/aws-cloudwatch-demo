@@ -189,4 +189,5 @@ Diff between aws_iam_role, aws_iam_policy, aws_iam_role_policy, aws_iam_policy_a
 - [使用node.js发布到Amazon sns主题的参数示例](https://www.coder.work/article/7232808)
 - [Calling the setSMSAttributes operation](http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/SNS.html#publish-property)
 
-- [](https://stackoverflow.com/questions/34029251/aws-publish-sns-message-for-lambda-function-via-boto3-python2)
+- [publish-sns-message-for-lambda-function](https://stackoverflow.com/questions/34029251/aws-publish-sns-message-for-lambda-function-via-boto3-python2)
+- [为什么在 CloudWatch 警报触发时，我没有收到 SNS 通知](https://aws.amazon.com/cn/premiumsupport/knowledge-center/cloudwatch-receive-sns-for-alarm-trigger/)
